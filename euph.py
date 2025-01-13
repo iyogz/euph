@@ -2,6 +2,9 @@ import random
 import string
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # Function to generate a random Gmail address
@@ -12,8 +15,13 @@ def generate_random_email():
 
 # Function to automate referral signup on Euphoria Finance waitlist
 def automate_referral(referral_code, num_referrals):
-    # Setup WebDriver (make sure you have ChromeDriver installed)
-    driver = webdriver.Chrome()
+    # Setup WebDriver with headless option
+    options = Options()
+    options.add_argument('--headless')  # Headless mode for environments without GUI
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    driver = webdriver.Chrome(options=options)
 
     # Loop for the number of referrals you want
     for _ in range(num_referrals):
@@ -25,22 +33,21 @@ def automate_referral(referral_code, num_referrals):
         referral_url = f"https://euphoria.finance/?ref_id={referral_code}#waitlist"
         driver.get(referral_url)
 
-        # Wait for the page to load
-        time.sleep(5)
+        # Wait for the email input field to be present
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
 
         # Fill out the form with the generated email (no username or password)
         driver.find_element(By.NAME, "email").send_keys(temp_email)
 
-        # Submit the form
+        # Submit the form (adjust the XPATH if necessary)
         submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
         submit_button.click()
 
         # Wait for the page to load after submission
         time.sleep(5)
 
-        # Optional: You can check for a success message or other confirmation
+        # Optional: Check for a success message or other confirmation
         try:
-            # This part will depend on the specific confirmation you want to check
             confirmation_message = driver.find_element(By.XPATH, "//div[contains(text(), 'success')]")
             print(f"Referral {temp_email} was successful!")
         except Exception as e:
