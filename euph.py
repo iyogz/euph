@@ -21,98 +21,78 @@ def fetch_user_agents():
     
     if response.status_code == 200:
         user_agents = response.text.splitlines()  # Split the content into lines
-        # Filter out any empty lines or comments (if any)
-        user_agents = [ua.strip() for ua in user_agents if ua.strip() and not ua.startswith('#')]
+        user_agents = [ua.strip() for ua in user_agents if ua.strip() and not ua.startswith('#')]  # Clean up the list
         return user_agents
     else:
         print("Failed to fetch user-agents from the URL.")
         return []
 
-# Function to automate referral signup on Euphoria Finance waitlist
+# Function to automate referral signup
 def automate_referral(referral_code, num_referrals):
     try:
-        # Fetch the user-agent list from the provided URL
+        # Fetch the user-agent list
         user_agents = fetch_user_agents()
         if not user_agents:
             print("No user-agents found. Exiting.")
             return
         
-        # Setup WebDriver with headless option
+        # Setup WebDriver options
         options = Options()
-        options.add_argument('--headless')  # Headless mode for environments without GUI
+        options.add_argument('--headless')  # Run in headless mode
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
 
         driver = webdriver.Chrome(options=options)
-        print("Driver initialized, starting automation.")
+        print("Driver initialized. Starting automation...")
 
-        # Loop for the number of referrals you want
+        # Loop for the number of referrals
         for i in range(num_referrals):
-            # Generate a random email
-            temp_email = generate_random_email()
-            print(f"Referral {i + 1}: Using temporary email: {temp_email}")
+            temp_email = generate_random_email()  # Generate a random email
+            print(f"Referral {i + 1}: Using email {temp_email}")
 
-            # Randomly select a user-agent for this referral
-            user_agent = random.choice(user_agents)
+            user_agent = random.choice(user_agents)  # Select a random user-agent
             print(f"Using User-Agent: {user_agent}")
 
-            # Apply the selected user-agent for this referral
+            # Set the user-agent
             options.add_argument(f"user-agent={user_agent}")
-            driver.quit()  # Close the existing driver to apply the new user-agent
-
-            # Re-initialize the driver with the updated options (new user-agent)
+            driver.quit()  # Restart driver to apply new user-agent
             driver = webdriver.Chrome(options=options)
 
-            # Open the referral URL with the referral code
-            referral_url = f"https://euphoria.finance/?ref_id={referral_code}#waitlist"
+            # Construct the referral URL
+            referral_url = f"https://euphoria.finance/?ref_id={referral_code}"
             driver.get(referral_url)
-            print(f"Opened referral URL: {referral_url}")
+            print(f"Opened URL: {referral_url}")
 
-            # Wait for the email input field to be present
+            # Wait for the email input field
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
 
             try:
-                # Find the email input field and fill it
                 email_input = driver.find_element(By.NAME, "email")
-                email_input.clear()  # Clear the field, in case it is pre-filled
-                email_input.send_keys(temp_email)
+                email_input.clear()
+                email_input.send_keys(temp_email)  # Enter the generated email
                 print(f"Entered email: {temp_email}")
 
-                # Wait for the submit button to be present and visible
+                # Wait for and click the submit button
                 submit_button = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_button__8B4nB"))
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".Button_button__8B4nB"))
                 )
+                driver.execute_script("arguments[0].click();", submit_button)  # Click using JavaScript
+                print(f"Submitted referral for email: {temp_email}")
 
-                # Scroll to the submit button aggressively
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")  # Scroll to the bottom
-                time.sleep(1)  # Allow some time for scrolling to finish
-                driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
-                print("Scrolled to the submit button.")
-
-                # Wait a bit for any potential animations or issues
-                time.sleep(1)
-
-                # Use JavaScript to click the submit button if normal click is not working
-                driver.execute_script("arguments[0].click();", submit_button)
-                print(f"Submitted referral for {temp_email}")
-
-                # Wait a few seconds before proceeding to the next referral
-                time.sleep(2)
+                time.sleep(2)  # Short delay before the next iteration
 
             except Exception as e:
-                print(f"Error during referral {i + 1}: {str(e)}")
+                print(f"Error during referral {i + 1}: {e}")
                 continue
 
-        # Close the browser after completing all referrals
-        driver.quit()
-        print("Automation completed, browser closed.")
+        driver.quit()  # Close the browser after finishing
+        print("Automation completed. Browser closed.")
 
     except Exception as e:
-        print(f"Error during automation: {str(e)}")
+        print(f"Error during automation: {e}")
 
-# Ask the user for the number of referrals to make
-num_referrals = int(input("How many referrals would you like to make? "))  # Manually input number of referrals
+# Main script
+referral_code = input("Enter your referral code: ").strip()  # Ask the user for the referral code
+num_referrals = int(input("How many referrals would you like to make? ").strip())  # Ask for number of referrals
 
-# Example usage
-referral_code = "QI3IBQJ8D"  # Your referral code
 automate_referral(referral_code, num_referrals)
