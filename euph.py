@@ -13,6 +13,16 @@ def generate_random_email():
     random_email = random_string + "@gmail.com"
     return random_email
 
+# List of user-agent strings (feel free to add more)
+user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0",
+    # You can add more user-agents if you need
+]
+
 # Function to automate referral signup on Euphoria Finance waitlist
 def automate_referral(referral_code, num_referrals):
     try:
@@ -30,6 +40,15 @@ def automate_referral(referral_code, num_referrals):
             # Generate a random email
             temp_email = generate_random_email()
             print(f"Referral {i + 1}: Using temporary email: {temp_email}")
+
+            # Randomly select a user-agent for this referral
+            user_agent = random.choice(user_agents)
+            options.add_argument(f"user-agent={user_agent}")  # Set custom user-agent
+            driver.quit()  # Close previous instance to reset with new user-agent
+
+            # Restart the browser with the new user-agent
+            driver = webdriver.Chrome(options=options)
+            print(f"Selected User-Agent: {user_agent}")
 
             # Open the referral URL with the referral code
             referral_url = f"https://euphoria.finance/?ref_id={referral_code}#waitlist"
