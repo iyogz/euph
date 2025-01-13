@@ -44,7 +44,7 @@ def automate_referral(referral_code, num_referrals):
             print("Error: Email input field not found.")
             continue
 
-        # Fill out the form with the generated email (no username or password)
+        # Fill out the form with the generated email
         driver.find_element(By.NAME, "email").send_keys(temp_email)
         print(f"Entered email: {temp_email}")
 
@@ -56,7 +56,7 @@ def automate_referral(referral_code, num_referrals):
             print("No popup or failed to wait for popup to disappear.")
 
         # Scroll to the submit button to ensure it's in the viewport
-        submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+        submit_button = driver.find_element(By.CLASS_NAME, "Button_button__8B4nB")
         driver.execute_script("arguments[0].scrollIntoView();", submit_button)
         print("Scrolled to the submit button.")
 
@@ -74,7 +74,6 @@ def automate_referral(referral_code, num_referrals):
 
         # Wait for the success message or confirmation (check for URL change, page reload, etc.)
         try:
-            # Wait for the confirmation or success message (adjust this based on actual confirmation element)
             WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'success')]")))
             print(f"Referral {temp_email} was successful!")
         except Exception as e:
@@ -87,10 +86,3 @@ def automate_referral(referral_code, num_referrals):
     # Close the browser after completing all referrals
     driver.quit()
     print("Automation completed, browser closed.")
-
-# Ask the user for the number of referrals to make
-num_referrals = int(input("How many referrals would you like to make? "))
-
-# Example usage
-referral_code = "QI3IBQJ8D"  # Your referral code
-automate_referral(referral_code, num_referrals)
