@@ -3,6 +3,8 @@ import string
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # Function to generate a random Gmail address
@@ -35,7 +37,7 @@ def automate_referral(referral_code, num_referrals):
             print(f"Opened referral URL: {referral_url}")
 
             # Wait for the email input field to be present
-            driver.implicitly_wait(10)  # Wait for the email input field (implicitly wait)
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
             
             try:
                 # Find the email input field and fill it
@@ -44,8 +46,25 @@ def automate_referral(referral_code, num_referrals):
                 email_input.send_keys(temp_email)
                 print(f"Entered email: {temp_email}")
 
-                # Find the submit button and click it
-                submit_button = driver.find_element(By.CLASS_NAME, "Button_button__8B4nB")
+                # Check for and close any potential popups or overlays
+                try:
+                    # If there's a close button for an overlay, click it
+                    close_button = driver.find_element(By.CLASS_NAME, "close-button-class")  # Replace with actual class if known
+                    close_button.click()
+                    print("Closed potential overlay.")
+                except:
+                    print("No overlay or popup found.")
+
+                # Wait for the submit button to be clickable
+                submit_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".Button_button__8B4nB"))
+                )
+
+                # Scroll to the submit button to ensure it's in the viewport
+                driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
+                print("Scrolled to the submit button.")
+
+                # Click the submit button
                 submit_button.click()
                 print(f"Submitted referral for {temp_email}")
 
