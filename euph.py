@@ -16,7 +16,7 @@ def generate_random_email():
 
 # Function to fetch the list of user-agent strings from the provided URL
 def fetch_user_agents():
-    url = "https://gist.github.com/pzb/b4b6f57144aea7827ae4"
+    url = "https://gist.github.com/bulletinmybeard/7e8d92b511b7b3681a0dd1438fe78411"
     response = requests.get(url)
     
     if response.status_code == 200:
