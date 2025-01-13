@@ -1,17 +1,5 @@
-import random
-import string
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
-
-# Function to generate a random Gmail address
-def generate_random_email():
-    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-    random_email = random_string + "@gmail.com"
-    return random_email
+from selenium.webdriver.common.by import By
 
 # Function to automate referral signup on Euphoria Finance waitlist
 def automate_referral(referral_code, num_referrals):
@@ -39,9 +27,26 @@ def automate_referral(referral_code, num_referrals):
         # Fill out the form with the generated email (no username or password)
         driver.find_element(By.NAME, "email").send_keys(temp_email)
 
-        # Submit the form (adjust the XPATH if necessary)
+        # Wait for the popup (if any) to disappear or close
+        try:
+            # Wait for the modal or popup to disappear (adjust the element or timeout if necessary)
+            WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.CLASS_NAME, "WaitlistPopup_inner__Yybww")))
+        except:
+            print("Popup did not appear or timed out.")
+
+        # Scroll to the submit button to ensure it's in the viewport
         submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-        submit_button.click()
+        driver.execute_script("arguments[0].scrollIntoView();", submit_button)
+
+        # Wait a bit before clicking (if there's animation or delay)
+        time.sleep(1)
+
+        # Try clicking the submit button
+        try:
+            submit_button.click()
+        except:
+            # If normal click fails, use JavaScript to click the button
+            driver.execute_script("arguments[0].click();", submit_button)
 
         # Wait for the page to load after submission
         time.sleep(5)
@@ -55,10 +60,4 @@ def automate_referral(referral_code, num_referrals):
 
     # Close the browser after completing all referrals
     driver.quit()
-
-# Ask the user for the number of referrals to make
-num_referrals = int(input("How many referrals would you like to make? "))
-
-# Example usage
-referral_code = "QI3IBQJ8D"  # Your referral code
-automate_referral(referral_code, num_referrals)
+    
