@@ -72,15 +72,17 @@ def automate_referral(referral_code, num_referrals):
             driver.execute_script("arguments[0].click();", submit_button)
             print(f"JavaScript click for {temp_email}")
 
-        # Wait for the page to load after submission
-        time.sleep(5)
-
-        # Optional: Check for a success message or other confirmation
+        # Wait for the success message or confirmation (check for URL change, page reload, etc.)
         try:
-            confirmation_message = driver.find_element(By.XPATH, "//div[contains(text(), 'success')]")
+            # Wait for the confirmation or success message (adjust this based on actual confirmation element)
+            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'success')]")))
             print(f"Referral {temp_email} was successful!")
         except Exception as e:
             print(f"Error or referral not successful for {temp_email}")
+        
+        # Optional: Check if the URL changes to a confirmation page or a "thank you" page
+        current_url = driver.current_url
+        print(f"Current URL after submission: {current_url}")
 
     # Close the browser after completing all referrals
     driver.quit()
