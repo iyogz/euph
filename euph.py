@@ -38,7 +38,7 @@ def automate_referral(referral_code, num_referrals):
 
             # Wait for the email input field to be present
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
-            
+
             try:
                 # Find the email input field and fill it
                 email_input = driver.find_element(By.NAME, "email")
@@ -46,26 +46,22 @@ def automate_referral(referral_code, num_referrals):
                 email_input.send_keys(temp_email)
                 print(f"Entered email: {temp_email}")
 
-                # Check for and close any potential popups or overlays
-                try:
-                    # If there's a close button for an overlay, click it
-                    close_button = driver.find_element(By.CLASS_NAME, "close-button-class")  # Replace with actual class if known
-                    close_button.click()
-                    print("Closed potential overlay.")
-                except:
-                    print("No overlay or popup found.")
-
-                # Wait for the submit button to be clickable
+                # Wait for the submit button to be present and visible
                 submit_button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".Button_button__8B4nB"))
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".Button_button__8B4nB"))
                 )
 
-                # Scroll to the submit button to ensure it's in the viewport
+                # Scroll to the submit button aggressively
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")  # Scroll to the bottom
+                time.sleep(1)  # Allow some time for scrolling to finish
                 driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
                 print("Scrolled to the submit button.")
 
-                # Click the submit button
-                submit_button.click()
+                # Wait a bit for any potential animations or issues
+                time.sleep(1)
+
+                # Use JavaScript to click the submit button if normal click is not working
+                driver.execute_script("arguments[0].click();", submit_button)
                 print(f"Submitted referral for {temp_email}")
 
                 # Wait a few seconds before proceeding to the next referral
@@ -78,7 +74,7 @@ def automate_referral(referral_code, num_referrals):
         # Close the browser after completing all referrals
         driver.quit()
         print("Automation completed, browser closed.")
-    
+
     except Exception as e:
         print(f"Error during automation: {str(e)}")
 
